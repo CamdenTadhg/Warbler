@@ -6,6 +6,7 @@ from sqlalchemy.exc import IntegrityError
 
 from forms import UserAddForm, LoginForm, MessageForm
 from models import db, connect_db, User, Message
+import pdb
 
 CURR_USER_KEY = "curr_user"
 
@@ -18,7 +19,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = (
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = False
-app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = True
+app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "it's a secret")
 toolbar = DebugToolbarExtension(app)
 
@@ -61,7 +62,7 @@ def signup():
 
     If form not valid, present form.
 
-    If the there already is a user with that username: flash message
+    If there already is a user with that username: flash message
     and re-present form.
     """
 
@@ -77,8 +78,15 @@ def signup():
             )
             db.session.commit()
 
-        except IntegrityError:
-            flash("Username already taken", 'danger')
+        except IntegrityError as e:
+            print('**************************')
+            print(e)
+            print('***************************')
+            db.session.rollback()
+            if "users_email_key" in str(e):
+                flash("Email already taken", "danger")
+            if "users_username_key" in str(e):
+                flash("Username already taken", 'danger')
             return render_template('users/signup.html', form=form)
 
         do_login(user)
@@ -113,7 +121,12 @@ def login():
 def logout():
     """Handle logout of user."""
 
-    # IMPLEMENT THIS
+    if not g.user:
+        return redirect('/users/login.html')
+    else: 
+        session[CURR_USER_KEY] = None
+        g.user = None
+        return redirect('/')
 
 
 ##############################################################################
@@ -125,7 +138,10 @@ def list_users():
 
     Can take a 'q' param in querystring to search by that username.
     """
-
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+    
     search = request.args.get('q')
 
     if not search:
@@ -139,7 +155,11 @@ def list_users():
 @app.route('/users/<int:user_id>')
 def users_show(user_id):
     """Show user profile."""
-
+    
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+    
     user = User.query.get_or_404(user_id)
 
     # snagging messages in order from the database;
@@ -321,28 +341,25 @@ def add_header(req):
     req.headers['Cache-Control'] = 'public, max-age=0'
     return req
 
-# 25 setup
-# 24 understand the model
-# 23 fix logout
-# 22 fix user profile
-# 21 fix user cards
-# 20 implement profile edit
-# 19 fix homepage
-# 18 research and understand login strategy
-# 17 implement likes
-# 16 implement tests
-# 15 implement AJAX
-# 14 DRY up templates
-# 13 DRY up authorization
-# 12 DRY up URLs
-# 11 optimize queries
-# 10 implement change password
-# 9 implement private accounts
-# 8 implement admin users
-# 7 implement user blocking
-# 6 implement direct messages
-# 5 run private_tests
-# 4 fix private_tests to run on my version
-# 3 go through the whole thing, clean up, add comments, etc. 
-# 2 run private tests one more time
-# 1 submit
+# 22 fix user profile (Thurs)
+# 21 fix user cards (Thurs)
+# 20 implement profile edit (Thurs)
+# 19 fix homepage (Thurs)
+# 18 research and understand login strategy (Thurs)
+# 17 implement likes (Thurs)
+# 16 implement tests (Fri)
+# 15 implement AJAX (Sat)
+# 14 DRY up templates (Sat)
+# 13 DRY up authorization (Sat)
+# 12 DRY up URLs (Sat)
+# 11 optimize queries (Sat)
+# 10 implement change password (Sun)
+# 9 implement private accounts (Sun)
+# 8 implement admin users (Sun)
+# 7 implement user blocking (Sun)
+# 6 implement direct messages (Sun)
+# 5 run private_tests (Sun)
+# 4 fix private_tests to run on my version (Sun)
+# 3 go through the whole thing, clean up, add comments, etc. (Sun)
+# 2 run private tests one more time (Sun)
+# 1 submit (Sun)

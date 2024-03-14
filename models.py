@@ -107,7 +107,7 @@ class User(db.Model):
         "User",
         secondary="follows",
         primaryjoin=(Follows.user_following_id == id),
-        secondaryjoin=(Follows.user_being_followed_id == id)
+        secondaryjoin=(Follows.user_being_followed_id == id),
     )
 
     likes = db.relationship(
@@ -188,7 +188,8 @@ class Message(db.Model):
     timestamp = db.Column(
         db.DateTime,
         nullable=False,
-        default=datetime.utcnow(),
+        ## method was deprecated. Changing to current method.
+        default=datetime.now(),
     )
 
     user_id = db.Column(
