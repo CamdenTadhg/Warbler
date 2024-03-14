@@ -19,14 +19,15 @@
                         action="/messages/{{ message.id }}/delete">
                     <button class="btn btn-outline-danger">Delete</button>
                   </form>
-                {% elif g.user.is_following(message.user) %}
-                  <form method="POST"
-                        action="/users/stop-following/{{ message.user.id }}">
-                    <button class="btn btn-primary">Unfollow</button>
-                  </form>
-                {% else %}
-                  <form method="POST" action="/users/follow/{{ message.user.id }}">
-                    <button class="btn btn-outline-primary btn-sm">Follow</button>
+                  {% elif message.user.id != g.user.id %}
+                  <form method="POST" action="/users/add_like/{{ message.id }}" id="messages-form">
+                    <button class="
+                      btn 
+                      btn-sm 
+                      {{'btn-primary' if message.id in likes else 'btn-secondary'}}"
+                    >
+                      <i class="fa fa-thumbs-up"></i> 
+                    </button>
                   </form>
                 {% endif %}
               {% endif %}

@@ -132,8 +132,7 @@ def logout():
     if not g.user:
         return redirect('/users/login.html')
     else: 
-        session[CURR_USER_KEY] = None
-        g.user = None
+        do_logout()
         flash("You have logged out.", 'success')
         return redirect('/login')
 
@@ -203,6 +202,17 @@ def users_followers(user_id):
     user = User.query.get_or_404(user_id)
     return render_template('users/followers.html', user=user)
 
+@app.route('/users/<int:user_id>/likes')
+def users_likes(user_id):
+    """Show list of likes of this user"""
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    user = User.query.get_or_404(user_id)
+    return render_template('users/likes.html', user=user)
+
 
 @app.route('/users/follow/<int:follow_id>', methods=['POST'])
 def add_follow(follow_id):
@@ -235,7 +245,7 @@ def stop_following(follow_id):
     return redirect(f"/users/{g.user.id}/following")
 
 
-@app.route('/users/<int:user_id>/profile', methods=["GET", "POST"])
+@app.route('/users/profile', methods=["GET", "POST"])
 def profile(user_id):
     """Update profile for current user."""
     
@@ -245,7 +255,7 @@ def profile(user_id):
         return redirect("/")
 
     # updating to more current query syntax
-    user = db.session.query(User).get(user_id)
+    user = db.session.query(User).get(g.user.id)
     form = UserEditForm(obj=user)
     print('USER FOUND', user)
     print('CSRF TOKEN', form.csrf_token.data)
@@ -281,6 +291,30 @@ def profile(user_id):
     else:
         return render_template(f'users/edit.html', form=form, user=user)
 
+@app.route('/users/add_like/<int:msg_id>', methods=["POST"])
+def add_remove_likes(msg_id):
+    """Adds or removes a message from a user's likes"""
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+    
+    user = db.session.query(User).get(g.user.id)
+    message = db.session.query(Message).get(msg_id)
+
+    if user:
+        if message not in user.likes:
+            user.likes.append(message)
+            db.session.add(user)
+            db.session.commit()
+        elif message in user.likes:
+            user.likes.remove(message)
+            db.session.add(user)
+            db.session.commit()
+        return render_template('users/likes.html', user=user)
+    else:
+        flash("Access unauthorized.", "danger")
+        return redirect('/')
 
 @app.route('/users/delete', methods=["POST"])
 def delete_user():
@@ -389,8 +423,6 @@ def add_header(req):
     req.headers['Cache-Control'] = 'public, max-age=0'
     return req
 
-# 18 research and understand login strategy (Thurs)
-# 17 implement likes (Thurs)
 # 16 implement tests (Thurs)
 # 15 implement AJAX (Thurs)
 # 14 DRY up templates (Fri)
