@@ -5,7 +5,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
 from forms import UserAddForm, LoginForm, MessageForm, UserEditForm
-from models import db, connect_db, User, Message
+from models import db, connect_db, User, Message, Follows
 import pdb
 
 CURR_USER_KEY = "curr_user"
@@ -358,11 +358,17 @@ def homepage():
     """
 
     if g.user:
+        followed_users =[follows.user_being_followed_id for follows in db.session.query(Follows).filter(Follows.user_following_id == g.user.id).all()]
+        print('**************************')
+        print(followed_users)
+        print('************************')
         messages = (Message
                     .query
+                    .filter((Message.user_id.in_(followed_users)) | (Message.user_id == g.user.id))
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all())
+
 
         return render_template('home.html', messages=messages)
 
@@ -387,7 +393,6 @@ def add_header(req):
     req.headers['Cache-Control'] = 'public, max-age=0'
     return req
 
-# 19 fix homepage (Thurs)
 # 18 research and understand login strategy (Thurs)
 # 17 implement likes (Thurs)
 # 16 implement tests (Thurs)
