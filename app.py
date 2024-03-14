@@ -35,7 +35,8 @@ def add_user_to_g():
     """If we're logged in, add curr user to Flask global."""
 
     if CURR_USER_KEY in session:
-        g.user = User.query.get(session[CURR_USER_KEY])
+        # updating to more current syntax
+        g.user = db.session.query(User).get(session[CURR_USER_KEY])
 
     else:
         g.user = None
@@ -88,6 +89,7 @@ def signup():
             db.session.commit()
 
         except IntegrityError as e:
+            ##differentiating between non-unique username and non-unique email
             db.session.rollback()
             if "users_email_key" in str(e):
                 flash("Email already taken", "danger")
@@ -151,10 +153,11 @@ def list_users():
     
     search = request.args.get('q')
 
+    #updating to more current syntax
     if not search:
-        users = User.query.all()
+        users = db.session.query(User).all()
     else:
-        users = User.query.filter(User.username.like(f"%{search}%")).all()
+        users = db.session.query(User).filter(User.username.like(f"%{search}%")).all()
 
     return render_template('users/index.html', users=users)
 
@@ -171,12 +174,9 @@ def users_show(user_id):
 
     # snagging messages in order from the database;
     # user.messages won't be in order by default
-    messages = (Message
-                .query
-                .filter(Message.user_id == user_id)
-                .order_by(Message.timestamp.desc())
-                .limit(100)
-                .all())
+    # also updating to more recent query syntax
+    messages = db.session.query(Message).filter(Message.user_id == user_id).order_by(Message.timestamp.desc()).limit(100).all()
+
     return render_template('users/show.html', user=user, messages=messages)
 
 
@@ -226,8 +226,9 @@ def stop_following(follow_id):
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
-
-    followed_user = User.query.get(follow_id)
+    
+    # updating to more current query syntax
+    followed_user = db.session.query(User).get(follow_id)
     g.user.following.remove(followed_user)
     db.session.commit()
 
@@ -243,7 +244,8 @@ def profile(user_id):
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    user = User.query.get(user_id)
+    # updating to more current query syntax
+    user = db.session.query(User).get(user_id)
     form = UserEditForm(obj=user)
     print('USER FOUND', user)
     print('CSRF TOKEN', form.csrf_token.data)
@@ -326,7 +328,8 @@ def messages_add():
 def messages_show(message_id):
     """Show a message."""
 
-    msg = Message.query.get(message_id)
+    # updating to more current query syntax
+    msg = db.session.query(Message).get(message_id)
     return render_template('messages/show.html', message=msg)
 
 
@@ -338,7 +341,8 @@ def messages_destroy(message_id):
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    msg = Message.query.get(message_id)
+    # updating to more current query syntax
+    msg = db.session.query(Message).get(message_id)
     db.session.delete(msg)
     db.session.commit()
 
@@ -358,17 +362,9 @@ def homepage():
     """
 
     if g.user:
+        #updating to more recent syntax
         followed_users =[follows.user_being_followed_id for follows in db.session.query(Follows).filter(Follows.user_following_id == g.user.id).all()]
-        print('**************************')
-        print(followed_users)
-        print('************************')
-        messages = (Message
-                    .query
-                    .filter((Message.user_id.in_(followed_users)) | (Message.user_id == g.user.id))
-                    .order_by(Message.timestamp.desc())
-                    .limit(100)
-                    .all())
-
+        messages = db.session.query(Message).filter((Message.user_id.in_(followed_users)) | (Message.user_id == g.user.id)).order_by(Message.timestamp.desc()).limit(100).all()
 
         return render_template('home.html', messages=messages)
 
