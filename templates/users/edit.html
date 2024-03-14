@@ -6,9 +6,9 @@
     <div class="col-md-4">
       <h2 class="join-message">Edit Your Profile.</h2>
       <form method="POST" id="user_form">
-        {{ form.hidden_tag() }}
+        {{ form.csrf_token() }}
 
-        {% for field in form if field.widget.input_type != 'hidden' and field.name != 'password' %}
+        {% for field in form if field.widget.input_type != 'hidden' and field.name != 'password' and field.name != 'password2'%}
           {% for error in field.errors %}
             <span class="text-danger">{{ error }}</span>
           {% endfor %}
@@ -27,7 +27,7 @@
 
         <div class="edit-btn-area">
           <button class="btn btn-success">Edit this user!</button>
-          <a href="/users/{{ user_id }}" class="btn btn-outline-secondary">Cancel</a>
+          <a href="/users/{{user.id}}" class="btn btn-outline-secondary">Cancel</a>
         </div>
       </form>
     </div>

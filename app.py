@@ -4,7 +4,7 @@ from flask import Flask, render_template, request, flash, redirect, session, g
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
-from forms import UserAddForm, LoginForm, MessageForm
+from forms import UserAddForm, LoginForm, MessageForm, UserEditForm
 from models import db, connect_db, User, Message
 import pdb
 
@@ -234,11 +234,50 @@ def stop_following(follow_id):
     return redirect(f"/users/{g.user.id}/following")
 
 
-@app.route('/users/profile', methods=["GET", "POST"])
-def profile():
+@app.route('/users/<int:user_id>/profile', methods=["GET", "POST"])
+def profile(user_id):
     """Update profile for current user."""
+    
+    #other users should not even be able to access the edit form.
+    if not g.user.id == user_id:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
 
-    # IMPLEMENT THIS
+    user = User.query.get(user_id)
+    form = UserEditForm(obj=user)
+    print('USER FOUND', user)
+    print('CSRF TOKEN', form.csrf_token.data)
+    
+    if form.validate_on_submit():
+        print('FORM VALIDATED', form)
+        user = User.authenticate(user.username,
+                                 form.password.data)
+        if user:
+            print('USER AUTHENTICATED', user) 
+            user.username = form.username.data
+            user.email = form.email.data
+            user.image_url = form.image_url.data
+            user.header_image_url = form.header_image_url.data
+            user.bio = form.bio.data
+            user.location = form.location.data
+            try:
+                db.session.commit()
+            except IntegrityError as e:
+                db.session.rollback()
+                if "users_email_key" in str(e):
+                    flash("Email already taken", "danger")
+                if "users_username_key" in str(e):
+                    flash("Username already taken", 'danger')
+                return render_template('users/edit.html', form=form, user=user)
+            return redirect(f'/users/{user.id}')
+        else: 
+            flash('Invalid password. Please try again', 'danger')
+            ##since only the authorized user can view this page, it's more user friendly
+            ##to have them return to the form page to try their password again. 
+            return render_template('users/edit.html', form=form, user=user)
+
+    else:
+        return render_template(f'users/edit.html', form=form, user=user)
 
 
 @app.route('/users/delete', methods=["POST"])
@@ -348,20 +387,18 @@ def add_header(req):
     req.headers['Cache-Control'] = 'public, max-age=0'
     return req
 
-# 21 fix user cards (Thurs)
-# 20 implement profile edit (Thurs)
 # 19 fix homepage (Thurs)
 # 18 research and understand login strategy (Thurs)
 # 17 implement likes (Thurs)
 # 16 implement tests (Thurs)
-# 15 implement AJAX (Fri)
-# 14 DRY up templates (Sat)
-# 13 DRY up authorization (Sat)
-# 12 DRY up URLs (Sat)
+# 15 implement AJAX (Thurs)
+# 14 DRY up templates (Fri)
+# 13 DRY up authorization (Fri)
+# 12 DRY up URLs (Fri)
 # 11 optimize queries (Sat)
 # 10 implement change password (Sat)
-# 9 implement private accounts (Sun)
-# 8 implement admin users (Sun)
+# 9 implement private accounts (Sat)
+# 8 implement admin users (Sat)
 # 7 implement user blocking (Sun)
 # 6 implement direct messages (Sun)
 # 5 run private_tests (Sun)
