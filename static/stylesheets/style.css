@@ -212,6 +212,12 @@ nav + .container {
   right: 50%;
 }
 
+.header-image{
+  width: 100vw;
+  height: 50vh;
+  object-fit: fill;
+}
+
 .row.full-width {
   background-color: #fff;
   margin-top: -80px;

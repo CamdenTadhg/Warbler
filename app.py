@@ -75,6 +75,9 @@ def signup():
                 password=form.password.data,
                 email=form.email.data,
                 image_url=form.image_url.data or User.image_url.default.arg,
+                header_image_url = form.header_image_url.data,
+                bio = form.bio.data,
+                location = form.location.data
             )
             db.session.commit()
 
@@ -126,7 +129,8 @@ def logout():
     else: 
         session[CURR_USER_KEY] = None
         g.user = None
-        return redirect('/')
+        flash("You have logged out.", 'success')
+        return redirect('/login')
 
 
 ##############################################################################
@@ -341,19 +345,19 @@ def add_header(req):
     req.headers['Cache-Control'] = 'public, max-age=0'
     return req
 
-# 22 fix user profile (Thurs)
+# 22 implement confirm password
 # 21 fix user cards (Thurs)
 # 20 implement profile edit (Thurs)
 # 19 fix homepage (Thurs)
 # 18 research and understand login strategy (Thurs)
 # 17 implement likes (Thurs)
-# 16 implement tests (Fri)
-# 15 implement AJAX (Sat)
+# 16 implement tests (Thurs)
+# 15 implement AJAX (Fri)
 # 14 DRY up templates (Sat)
 # 13 DRY up authorization (Sat)
 # 12 DRY up URLs (Sat)
 # 11 optimize queries (Sat)
-# 10 implement change password (Sun)
+# 10 implement change password (Sat)
 # 9 implement private accounts (Sun)
 # 8 implement admin users (Sun)
 # 7 implement user blocking (Sun)
