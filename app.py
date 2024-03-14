@@ -320,3 +320,29 @@ def add_header(req):
     req.headers["Expires"] = "0"
     req.headers['Cache-Control'] = 'public, max-age=0'
     return req
+
+# 25 setup
+# 24 understand the model
+# 23 fix logout
+# 22 fix user profile
+# 21 fix user cards
+# 20 implement profile edit
+# 19 fix homepage
+# 18 research and understand login strategy
+# 17 implement likes
+# 16 implement tests
+# 15 implement AJAX
+# 14 DRY up templates
+# 13 DRY up authorization
+# 12 DRY up URLs
+# 11 optimize queries
+# 10 implement change password
+# 9 implement private accounts
+# 8 implement admin users
+# 7 implement user blocking
+# 6 implement direct messages
+# 5 run private_tests
+# 4 fix private_tests to run on my version
+# 3 go through the whole thing, clean up, add comments, etc. 
+# 2 run private tests one more time
+# 1 submit
