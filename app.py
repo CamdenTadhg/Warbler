@@ -69,6 +69,12 @@ def signup():
     form = UserAddForm()
 
     if form.validate_on_submit():
+        ## confirming a password is a better user experience so typos don't lead to incorrect passwords. 
+        password = form.password.data
+        password2 = form.password2.data
+        if password != password2:
+            form.password.errors=['Passwords do not match. Please try again']
+            return render_template('users/signup.html', form=form)
         try:
             user = User.signup(
                 username=form.username.data,
@@ -82,9 +88,6 @@ def signup():
             db.session.commit()
 
         except IntegrityError as e:
-            print('**************************')
-            print(e)
-            print('***************************')
             db.session.rollback()
             if "users_email_key" in str(e):
                 flash("Email already taken", "danger")
@@ -345,7 +348,6 @@ def add_header(req):
     req.headers['Cache-Control'] = 'public, max-age=0'
     return req
 
-# 22 implement confirm password
 # 21 fix user cards (Thurs)
 # 20 implement profile edit (Thurs)
 # 19 fix homepage (Thurs)
