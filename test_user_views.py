@@ -8,7 +8,7 @@
 import os
 from unittest import TestCase
 from app import do_login, do_logout, add_user_to_g
-from flask import g
+from flask import g, session
 
 from models import db, connect_db, Message, User
 
@@ -33,7 +33,6 @@ db.create_all()
 # Don't have WTForms use CSRF at all, since it's a pain to test
 
 app.config['WTF_CSRF_ENABLED'] = False
-
 
 class UserViewTestCase(TestCase):
     """Test views for users."""
@@ -312,22 +311,22 @@ class UserViewTestCase(TestCase):
             self.assertIn('You are already logged in', html)
             self.assertEqual(session[CURR_USER_KEY], self.testuser.id)
 
-    # def test_logout_loggedout(self):
-    #     """Does the site reject a logout request if the user is already logged out?"""
-    #     with self.client as c:
-    #         resp = c.post('/logout')
+    def test_logout_loggedout(self):
+        """Does the site reject a logout request if the user is already logged out?"""
+        with self.client as c:
+            resp = c.post('/logout')
 
-    #         self.assertEqual(resp.status_code, 302)
-    #         self.assertEqual(resp.location, 'http://localhost/login')
+            self.assertEqual(resp.status_code, 302)
+            self.assertEqual(resp.location, 'http://localhost/login')
 
-    # def test_logout_loggedout_redirect(self):
-    #     """Does the site redirect correctly when a logged out user tries to log out?"""
-    #     with self.client as c:
-    #         resp = c.post('/logout', follow_redirects=True)
-    #         html = resp.get_data(as_text=True)
+    def test_logout_loggedout_redirect(self):
+        """Does the site redirect correctly when a logged out user tries to log out?"""
+        with self.client as c:
+            resp = c.post('/logout', follow_redirects=True)
+            html = resp.get_data(as_text=True)
 
-    #         self.assertEqual(resp.status_code, 200)
-    #         self.assertIn('Welcome back.', html)
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Welcome back.', html)
 
     # def test_logout_success(self):
     #     """Can a user log out?"""
@@ -350,6 +349,7 @@ class UserViewTestCase(TestCase):
 
     #         self.assertEqual(resp.status_code, 200)
     #         self.assertIn('Welcome back.', html)
+            # self.assertIn('You have logged', html)
     #         self.assertFalse(session.get(CURR_USER_KEY))
     
     def test_list_users_loggedout(self):
@@ -431,8 +431,10 @@ class UserViewTestCase(TestCase):
             with c.session_transaction() as session:
                 session[CURR_USER_KEY] = self.testuser.id
             resp = c.get('/users/3000')
+            html = resp.get_data(as_text=True)
 
             self.assertEqual(resp.status_code, 404)
+            self.assertIn('blue jay', html)
 
     def test_show_following_loggedout(self):
         """Does the site deny access to a user's following list to an anonymous user?"""
@@ -470,8 +472,10 @@ class UserViewTestCase(TestCase):
             with c.session_transaction() as session:
                 session[CURR_USER_KEY] = self.testuser.id
             resp = c.get('/users/3000/following')
+            html = resp.get_data(as_text=True)
 
             self.assertEqual(resp.status_code, 404)
+            self.assertIn('blue jay', html)
 
     def test_users_followers_loggedout(self):
         """Does the site deny access to a user's followers list to an anonymous user?"""
@@ -508,8 +512,10 @@ class UserViewTestCase(TestCase):
             with c.session_transaction() as session:
                 session[CURR_USER_KEY] = self.testuser.id
             resp = c.get('/users/3000/followers')
+            html = resp.get_data(as_text=True)
 
             self.assertEqual(resp.status_code, 404)
+            self.assertIn('blue jay', html)
 
     def test_users_likes_loggedout(self):
         """Does the site deny access to a user's likes list to an anonymous user?"""
@@ -546,8 +552,10 @@ class UserViewTestCase(TestCase):
             with c.session_transaction() as session:
                 session[CURR_USER_KEY] = self.testuser.id
             resp = c.get('/users/3000/likes')
+            html = resp.get_data(as_text=True)
 
             self.assertEqual(resp.status_code, 404)
+            self.assertIn('blue jay', html)
 
     def test_add_follow_loggedout(self):
         """Does the site stop an anonymous user from adding a follow?"""

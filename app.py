@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, render_template, request, flash, redirect, session, g
+from flask import Flask, render_template, request, flash, redirect, session, g, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
@@ -14,14 +14,14 @@ app = Flask(__name__)
 
 # Get DB_URI from environ variable (useful for production/testing) or,
 # if not set there, use development local db.
-app.config['SQLALCHEMY_DATABASE_URI'] = (
-    os.environ.get('DATABASE_URL', 'postgresql:///warbler'))
-# app.config['SQLALCHEMY_DATABASE_URI'] = (os.environ.get('DATABASE_URL', "postgresql:///warbler-test"))
+# app.config['SQLALCHEMY_DATABASE_URI'] = (
+#     os.environ.get('DATABASE_URL', 'postgresql:///warbler'))
+app.config['SQLALCHEMY_DATABASE_URI'] = (os.environ.get('DATABASE_URL', "postgresql:///warbler-test"))
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = False
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "it's a secret")
-toolbar = DebugToolbarExtension(app)
+# toolbar = DebugToolbarExtension(app)
 
 connect_db(app)
 
@@ -128,7 +128,7 @@ def login():
     return render_template('users/login.html', form=form)
 
 
-@app.route('/logout')
+@app.route('/logout', methods=["POST"])
 def logout():
     """Handle logout of user."""
 
@@ -300,11 +300,12 @@ def add_remove_likes(msg_id):
             user.likes.append(message)
             db.session.add(user)
             db.session.commit()
+            return jsonify('like added')
         elif message in user.likes:
             user.likes.remove(message)
             db.session.add(user)
             db.session.commit()
-        return render_template('users/likes.html', user=user)
+            return jsonify('like removed')
     else:
         flash("Access unauthorized.", "danger")
         return redirect('/')
@@ -406,7 +407,7 @@ def homepage():
         return render_template('home-anon.html')
 
 @app.errorhandler(404)
-def page_not_found():
+def page_not_found(error):
     """Custom 404 page"""
     return render_template('404.html'), 404
 
@@ -429,9 +430,6 @@ def add_header(req):
     return req
 
 
-
-# 17 implement custom 404 page
-    # testing
 # 16 implement AJAX
     # testing
 # 15 DRY up templates
