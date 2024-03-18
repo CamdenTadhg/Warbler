@@ -12,7 +12,8 @@
           {% for error in field.errors %}
             <span class="text-danger">{{ error }}</span>
           {% endfor %}
-          {{ field(placeholder=field.label.text, class_="form-control") }}
+          {{field.label}}
+          {{ field(class_="form-control") }}
         {% endfor %}
 
         <p>To confirm changes, enter your password:</p>

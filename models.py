@@ -94,13 +94,14 @@ class User(db.Model):
         nullable=False,
     )
 
-    messages = db.relationship('Message')
+    messages = db.relationship('Message', cascade="all, delete")
 
     followers = db.relationship(
         "User",
         secondary="follows",
         primaryjoin=(Follows.user_being_followed_id == id),
-        secondaryjoin=(Follows.user_following_id == id)
+        secondaryjoin=(Follows.user_following_id == id), 
+        cascade="all, delete"
     )
 
     following = db.relationship(
@@ -108,15 +109,17 @@ class User(db.Model):
         secondary="follows",
         primaryjoin=(Follows.user_following_id == id),
         secondaryjoin=(Follows.user_being_followed_id == id),
+        cascade="all,delete"
     )
 
     likes = db.relationship(
         'Message',
-        secondary="likes"
+        secondary="likes",
+        cascade="all,delete"
     )
 
     def __repr__(self):
-        return f"<User #{self.id}: {self.username}, {self.email}>"
+        return f"<User {self.id}: {self.username}, {self.email}>"
 
     def is_followed_by(self, other_user):
         """Is this user followed by `other_user`?"""
@@ -201,7 +204,7 @@ class Message(db.Model):
         nullable=False,
     )
 
-    user = db.relationship('User')
+    user = db.relationship('User', cascade="all, delete")
 
 
 def connect_db(app):

@@ -16,7 +16,7 @@ app = Flask(__name__)
 # if not set there, use development local db.
 app.config['SQLALCHEMY_DATABASE_URI'] = (
     os.environ.get('DATABASE_URL', 'postgresql:///warbler'))
-
+# app.config['SQLALCHEMY_DATABASE_URI'] = (os.environ.get('DATABASE_URL', "postgresql:///warbler-test"))
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = False
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
@@ -41,19 +41,15 @@ def add_user_to_g():
     else:
         g.user = None
 
-
 def do_login(user):
     """Log in user."""
 
     session[CURR_USER_KEY] = user.id
 
-
 def do_logout():
     """Logout user."""
-
     if CURR_USER_KEY in session:
         del session[CURR_USER_KEY]
-
 
 @app.route('/signup', methods=["GET", "POST"])
 def signup():
@@ -66,6 +62,9 @@ def signup():
     If there already is a user with that username: flash message
     and re-present form.
     """
+    if g.user:
+        flash("You are already logged in.", "danger")
+        return redirect("/")
 
     form = UserAddForm()
 
@@ -109,6 +108,10 @@ def signup():
 def login():
     """Handle user login."""
 
+    if g.user:
+        flash("You are already logged in.", "danger")
+        return redirect("/")
+
     form = LoginForm()
 
     if form.validate_on_submit():
@@ -130,7 +133,7 @@ def logout():
     """Handle logout of user."""
 
     if not g.user:
-        return redirect('/users/login.html')
+        return redirect('/login')
     else: 
         do_logout()
         flash("You have logged out.", 'success')
@@ -154,7 +157,7 @@ def list_users():
 
     #updating to more current syntax
     if not search:
-        users = db.session.query(User).all()
+        users = db.session.query(User).order_by(User.username).all()
     else:
         users = db.session.query(User).filter(User.username.like(f"%{search}%")).all()
 
@@ -246,26 +249,16 @@ def stop_following(follow_id):
 
 
 @app.route('/users/profile', methods=["GET", "POST"])
-def profile(user_id):
+def profile():
     """Update profile for current user."""
-    
-    #other users should not even be able to access the edit form.
-    if not g.user.id == user_id:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
 
     # updating to more current query syntax
-    user = db.session.query(User).get(g.user.id)
-    form = UserEditForm(obj=user)
-    print('USER FOUND', user)
-    print('CSRF TOKEN', form.csrf_token.data)
+    form = UserEditForm(obj=g.user)
     
     if form.validate_on_submit():
-        print('FORM VALIDATED', form)
-        user = User.authenticate(user.username,
+        user = User.authenticate(g.user.username,
                                  form.password.data)
         if user:
-            print('USER AUTHENTICATED', user) 
             user.username = form.username.data
             user.email = form.email.data
             user.image_url = form.image_url.data
@@ -280,16 +273,16 @@ def profile(user_id):
                     flash("Email already taken", "danger")
                 if "users_username_key" in str(e):
                     flash("Username already taken", 'danger')
-                return render_template('users/edit.html', form=form, user=user)
+                return render_template('users/edit.html', form=form, user=g.user)
             return redirect(f'/users/{user.id}')
         else: 
             flash('Invalid password. Please try again', 'danger')
             ##since only the authorized user can view this page, it's more user friendly
             ##to have them return to the form page to try their password again. 
-            return render_template('users/edit.html', form=form, user=user)
+            return render_template('users/edit.html', form=form, user=g.user)
 
     else:
-        return render_template(f'users/edit.html', form=form, user=user)
+        return render_template(f'users/edit.html', form=form, user=g.user)
 
 @app.route('/users/add_like/<int:msg_id>', methods=["POST"])
 def add_remove_likes(msg_id):
@@ -302,7 +295,7 @@ def add_remove_likes(msg_id):
     user = db.session.query(User).get(g.user.id)
     message = db.session.query(Message).get(msg_id)
 
-    if user:
+    if user.id != message.user.id:
         if message not in user.likes:
             user.likes.append(message)
             db.session.add(user)
@@ -362,6 +355,10 @@ def messages_add():
 def messages_show(message_id):
     """Show a message."""
 
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
     # updating to more current query syntax
     msg = db.session.query(Message).get(message_id)
     return render_template('messages/show.html', message=msg)
@@ -377,6 +374,9 @@ def messages_destroy(message_id):
 
     # updating to more current query syntax
     msg = db.session.query(Message).get(message_id)
+    if g.user.id != msg.user.id:
+        flash('Access unauthorized!', "danger")
+        return redirect(f'/users/{g.user.id}')
     db.session.delete(msg)
     db.session.commit()
 
@@ -405,6 +405,11 @@ def homepage():
     else:
         return render_template('home-anon.html')
 
+@app.errorhandler(404)
+def page_not_found():
+    """Custom 404 page"""
+    return render_template('404.html'), 404
+
 
 ##############################################################################
 # Turn off all caching in Flask
@@ -423,19 +428,36 @@ def add_header(req):
     req.headers['Cache-Control'] = 'public, max-age=0'
     return req
 
-# 16 implement tests (Thurs)
-# 15 implement AJAX (Thurs)
-# 14 DRY up templates (Fri)
-# 13 DRY up authorization (Fri)
-# 12 DRY up URLs (Fri)
-# 11 optimize queries (Sat)
-# 10 implement change password (Sat)
-# 9 implement private accounts (Sat)
-# 8 implement admin users (Sat)
-# 7 implement user blocking (Sun)
-# 6 implement direct messages (Sun)
-# 5 run private_tests (Sun)
-# 4 fix private_tests to run on my version (Sun)
-# 3 go through the whole thing, clean up, add comments, etc. (Sun)
-# 2 run private tests one more time (Sun)
-# 1 submit (Sun)
+
+
+# 17 implement custom 404 page
+    # testing
+# 16 implement AJAX
+    # testing
+# 15 DRY up templates
+    # testing
+# 14 DRY up authorization 
+    # testing
+# 13 DRY up URLs
+    # testing
+# 12 optimize queries
+    # testing
+# 11 implement change password
+    # testing
+# 10 implement private accounts
+    # testing
+# 9 implement admin users
+    # testing
+# 8 implement user blocking
+    # testing
+# 7 implement direct messages
+    # testing
+# 6 run private_tests
+# 5 implement tests
+    # ensure that users can be deleted even if they have messages
+# 4 fix private_tests to run on my version
+    # testing
+# 3 go through the whole thing, clean up, add comments, etc.
+    # testing
+# 2 run private tests one more time.
+# 1 submit with note that the tests don't work 
