@@ -52,8 +52,8 @@
               <p>{{ message.text }}</p>
             </div>
             {% if message.user.id != g.user.id %}
-              <form method="POST" action="/users/add_like/{{ message.id }}" id="messages-form">
-                <button class="
+              <form id="messages-form">
+                <button id= "likes-button" class="
                   btn 
                   btn-sm 
                   {{'btn-primary' if message in g.user.likes else 'btn-secondary'}}"

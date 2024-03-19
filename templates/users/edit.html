@@ -6,7 +6,7 @@
     <div class="col-md-4">
       <h2 class="join-message">Edit Your Profile.</h2>
       <form method="POST" id="user_form">
-        {{ form.csrf_token() }}
+        {{ form.hidden_tag() }}
 
         {% for field in form if field.widget.input_type != 'hidden' and field.name != 'password' and field.name != 'password2'%}
           {% for error in field.errors %}

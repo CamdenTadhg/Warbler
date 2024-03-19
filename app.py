@@ -14,9 +14,9 @@ app = Flask(__name__)
 
 # Get DB_URI from environ variable (useful for production/testing) or,
 # if not set there, use development local db.
-# app.config['SQLALCHEMY_DATABASE_URI'] = (
-#     os.environ.get('DATABASE_URL', 'postgresql:///warbler'))
-app.config['SQLALCHEMY_DATABASE_URI'] = (os.environ.get('DATABASE_URL', "postgresql:///warbler-test"))
+app.config['SQLALCHEMY_DATABASE_URI'] = (
+    os.environ.get('DATABASE_URL', 'postgresql:///warbler'))
+# app.config['SQLALCHEMY_DATABASE_URI'] = (os.environ.get('DATABASE_URL', "postgresql:///warbler-test"))
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = False
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
@@ -252,6 +252,10 @@ def stop_following(follow_id):
 def profile():
     """Update profile for current user."""
 
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
     # updating to more current query syntax
     form = UserEditForm(obj=g.user)
     
@@ -266,6 +270,7 @@ def profile():
             user.bio = form.bio.data
             user.location = form.location.data
             try:
+                db.session.add(user)
                 db.session.commit()
             except IntegrityError as e:
                 db.session.rollback()
@@ -307,8 +312,7 @@ def add_remove_likes(msg_id):
             db.session.commit()
             return jsonify('like removed')
     else:
-        flash("Access unauthorized.", "danger")
-        return redirect('/')
+        return jsonify('request failed')
 
 @app.route('/users/delete', methods=["POST"])
 def delete_user():
@@ -452,7 +456,6 @@ def add_header(req):
     # testing
 # 6 run private_tests
 # 5 implement tests
-    # ensure that users can be deleted even if they have messages
 # 4 fix private_tests to run on my version
     # testing
 # 3 go through the whole thing, clean up, add comments, etc.

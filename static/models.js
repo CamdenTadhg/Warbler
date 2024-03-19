@@ -22,6 +22,8 @@ class Message {
 }
 
 // create event listener for liking/unliking and changing the button
+// see if it works
+// fix it until it works
 // create addMessage function
 // revise view function to accept data from addMessage function and return appriopriate response
 // create event listener for creating new message on the link
