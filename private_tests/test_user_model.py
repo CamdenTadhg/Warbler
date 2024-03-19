@@ -38,11 +38,11 @@ class UserModelTestCase(TestCase):
         db.drop_all()
         db.create_all()
 
-        u1 = User.signup("test1", "email1@email.com", "password", None)
+        u1 = User.signup("test1", "email1@email.com", "password", None, None, None, None)
         uid1 = 1111
         u1.id = uid1
 
-        u2 = User.signup("test2", "email2@email.com", "password", None)
+        u2 = User.signup("test2", "email2@email.com", "password", None, None, None, None)
         uid2 = 2222
         u2.id = uid2
 
@@ -70,7 +70,11 @@ class UserModelTestCase(TestCase):
         u = User(
             email="test@test.com",
             username="testuser",
-            password="HASHED_PASSWORD"
+            password="HASHED_PASSWORD",
+            image_url = None,
+            header_image_url = None,
+            bio = None, 
+            location = None
         )
 
         db.session.add(u)
@@ -118,7 +122,7 @@ class UserModelTestCase(TestCase):
     ####
     def test_valid_signup(self):
         u_test = User.signup(
-            "testtesttest", "testtest@test.com", "password", None)
+            "testtesttest", "testtest@test.com", "password", None, None, None, None)
         uid = 99999
         u_test.id = uid
         db.session.commit()
@@ -132,14 +136,14 @@ class UserModelTestCase(TestCase):
         self.assertTrue(u_test.password.startswith("$2b$"))
 
     def test_invalid_username_signup(self):
-        invalid = User.signup(None, "test@test.com", "password", None)
+        invalid = User.signup(None, "test@test.com", "password", None, None, None, None)
         uid = 123456789
         invalid.id = uid
         with self.assertRaises(exc.IntegrityError) as context:
             db.session.commit()
 
     def test_invalid_email_signup(self):
-        invalid = User.signup("testtest", None, "password", None)
+        invalid = User.signup("testtest", None, "password", None, None, None, None)
         uid = 123789
         invalid.id = uid
         with self.assertRaises(exc.IntegrityError) as context:
@@ -147,10 +151,10 @@ class UserModelTestCase(TestCase):
 
     def test_invalid_password_signup(self):
         with self.assertRaises(ValueError) as context:
-            User.signup("testtest", "email@email.com", "", None)
+            User.signup("testtest", "email@email.com", "", None, None, None, None)
 
         with self.assertRaises(ValueError) as context:
-            User.signup("testtest", "email@email.com", None, None)
+            User.signup("testtest", "email@email.com", None, None, None, None, None)
 
     ####
     #

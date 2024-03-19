@@ -1,3 +1,4 @@
+
 class Message {
 
     constructor(id, text, user_id){
@@ -6,27 +7,40 @@ class Message {
         this.user_id = user_id
     }
 
-    async addremoveLike(msg_id){
-        try{
-            console.log('starting addremoveLike');
-            const response = await axios.post(`/users/add_like/${msg_id}`);
+    async addMessage(){
+        try {
+            console.log('starting add message');
+            const response = await axios.post('/messages/new', messageData)
             console.log(response);
-            return response;
-        } catch(error) {
-            alert("Like failed. Please try again.")
+        }catch(error){
+            $alertSpace.text('Request failed. Please try again.')
         }
     }
-
-    async addMessage(){}
-
 }
 
-// create event listener for liking/unliking and changing the button
-// see if it works
-// fix it until it works
-// create addMessage function
-// revise view function to accept data from addMessage function and return appriopriate response
-// create event listener for creating new message on the link
-// create modal in which to create a new message
+class Like {
+
+    constructor(msg_id){
+        this.msg_id = msg_id
+    }
+
+    async addremoveLike(){
+        try{
+            console.log('starting addremoveLike');
+            const response = await axios.post(`/users/add_like/${this.msg_id}`);
+            console.log('response.data = ', response.data);
+            return response.data;
+        } catch(error) {
+            $alertSpace.text("Request failed. Please try again")
+        }
+    }
+}
+
+
+// create modal in which to create a new message (put the form in it)
 // create event listener on the modal to submit addMessage
-// write tests for all these functions. 
+// make sure it works
+// fix likes functionality now that I added the bootstrap javascript which apparently broke it
+// fix likes page doing the likes button incorrectly
+// write tests for all javascript functions
+

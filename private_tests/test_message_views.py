@@ -47,7 +47,10 @@ class MessageViewTestCase(TestCase):
         self.testuser = User.signup(username="testuser",
                                     email="test@test.com",
                                     password="testuser",
-                                    image_url=None)
+                                    image_url=None,
+                                    header_image_url=None, 
+                                    bio=None,
+                                    location=None)
         self.testuser_id = 8989
         self.testuser.id = self.testuser_id
 
@@ -148,7 +151,10 @@ class MessageViewTestCase(TestCase):
         u = User.signup(username="unauthorized-user",
                         email="testtest@test.com",
                         password="password",
-                        image_url=None)
+                        image_url=None, 
+                        header_image_url = None,
+                        bio=None,
+                        location=None)
         u.id = 76543
 
         # Message is owned by testuser

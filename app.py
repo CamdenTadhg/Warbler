@@ -1,7 +1,6 @@
 import os
 
 from flask import Flask, render_template, request, flash, redirect, session, g, jsonify
-from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
 from forms import UserAddForm, LoginForm, MessageForm, UserEditForm
@@ -21,7 +20,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = False
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "it's a secret")
-# toolbar = DebugToolbarExtension(app)
+app.config['SESSION_COOKIE_HTTPONLY'] = False
 
 connect_db(app)
 
@@ -305,11 +304,17 @@ def add_remove_likes(msg_id):
             user.likes.append(message)
             db.session.add(user)
             db.session.commit()
+            print('***********************')
+            print(user.likes)
+            print('************************')
             return jsonify('like added')
         elif message in user.likes:
             user.likes.remove(message)
             db.session.add(user)
             db.session.commit()
+            print('***********************')
+            print(user.likes)
+            print('************************')
             return jsonify('like removed')
     else:
         return jsonify('request failed')
@@ -333,28 +338,23 @@ def delete_user():
 ##############################################################################
 # Messages routes:
 
-@app.route('/messages/new', methods=["GET", "POST"])
+@app.route('/messages/new', methods=["POST"])
 def messages_add():
-    """Add a message:
+    """Add a message via ajax
 
-    Show form if GET. If valid, update message and redirect to user page.
     """
 
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    form = MessageForm()
+    text = request.json['text']
+    user_id = g.user.id
+    new_message = Message(text=text, user_id=user_id)
+    db.session.add(new_message)
+    db.session.commit()
 
-    if form.validate_on_submit():
-        msg = Message(text=form.text.data)
-        g.user.messages.append(msg)
-        db.session.commit()
-
-        return redirect(f"/users/{g.user.id}")
-
-    return render_template('messages/new.html', form=form)
-
+    return jsonify('message created')
 
 @app.route('/messages/<int:message_id>', methods=["GET"])
 def messages_show(message_id):
@@ -364,8 +364,7 @@ def messages_show(message_id):
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    # updating to more current query syntax
-    msg = db.session.query(Message).get(message_id)
+    msg = Message.query.get_or_404(message_id)
     return render_template('messages/show.html', message=msg)
 
 
@@ -435,30 +434,29 @@ def add_header(req):
 
 
 # 16 implement AJAX
+# 15 fix display of individual messages to show liked status correctly
+# 14 fix delete messages
+# 13 DRY up templates
     # testing
-# 15 DRY up templates
+# 12 DRY up authorization 
     # testing
-# 14 DRY up authorization 
+# 11 DRY up URLs
     # testing
-# 13 DRY up URLs
+# 10 optimize queries
     # testing
-# 12 optimize queries
+# 9 implement change password
     # testing
-# 11 implement change password
+# 8 implement private accounts
     # testing
-# 10 implement private accounts
+# 7 implement admin users
     # testing
-# 9 implement admin users
+# 6 implement user blocking
     # testing
-# 8 implement user blocking
+# 5 implement direct messages
     # testing
-# 7 implement direct messages
-    # testing
-# 6 run private_tests
-# 5 implement tests
-# 4 fix private_tests to run on my version
-    # testing
-# 3 go through the whole thing, clean up, add comments, etc.
+# 4 finish implementing tests
+# 3 go through the whole thing, clean up prints & console.logs, add comments, etc.
     # testing
 # 2 run private tests one more time.
 # 1 submit with note that the tests don't work 
+

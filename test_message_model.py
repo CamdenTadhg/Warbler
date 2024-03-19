@@ -7,6 +7,7 @@
 
 import os
 from unittest import TestCase
+from datetime import date
 
 from models import db, User, Message, Follows
 
@@ -58,4 +59,4 @@ class MessageModelTestCase(TestCase):
 
         self.assertEqual(m.user.username, 'janedoe')
         self.assertEqual(m.text, 'this is a test message')
-        self.assertIn('2024-03-14', str(m.timestamp))
+        self.assertIn(str(date.today()), str(m.timestamp))
