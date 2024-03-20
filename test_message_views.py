@@ -84,26 +84,12 @@ class MessageViewTestCase(TestCase):
             # Now, that session setting is saved, so we can have
             # the rest of our test
 
-            resp = c.post("/messages/new", data={"text": "Hello"})
-
-            # Make sure it redirects
-            self.assertEqual(resp.status_code, 302)
-            self.assertEqual(resp.location, f'http://localhost/users/{self.testuser.id}')
-
-            msg = db.session.query(Message).filter(Message.text == "Hello").first()
-            self.assertEqual(msg.text, "Hello")
-    
-    def test_add_message_redirect(self):
-        """Does site redirect appropriately after a message is added?"""
-        with self.client as c:
-            with c.session_transaction() as sess:
-                sess[CURR_USER_KEY] = self.testuser.id
-            
-            resp = c.post("/messages/new", data={"text": "Hello"}, follow_redirects=True)
-            html = resp.get_data(as_text=True)
+            resp = c.post("/messages/new", json={"text": "Hello"})
 
             self.assertEqual(resp.status_code, 200)
-            self.assertIn('@testuser', html)
+            self.assertEqual(resp.json, 'message created')
+            msg = db.session.query(Message).filter(Message.text == "Hello").first()
+            self.assertEqual(msg.text, "Hello")
 
     def test_add_message_loggedout(self):
         """Does site recognize when no one is logged in?"""
@@ -123,19 +109,6 @@ class MessageViewTestCase(TestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertIn("Sign up now", html)
             self.assertIn('Access unauthorized', html)
-
-
-    def test_add_message_form_display(self):
-        """Does site display add message form?"""
-        with self.client as c:
-            with c.session_transaction() as sess:
-                sess[CURR_USER_KEY] = self.testuser.id
-
-            resp = c.get('/messages/new')
-            html = resp.get_data(as_text=True)
-
-            self.assertEqual(resp.status_code, 200)
-            self.assertIn('Add my message!', html)
 
     def test_view_message(self):
         """Does site display another user's message appropriately?"""

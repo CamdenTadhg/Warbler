@@ -1,19 +1,20 @@
 
 class Message {
 
-    constructor(id, text, user_id){
-        this.id = id
+    constructor(text){
         this.text = text
-        this.user_id = user_id
     }
 
-    async addMessage(){
+    static async addMessage(text){
         try {
             console.log('starting add message');
-            const response = await axios.post('/messages/new', messageData)
+            console.log(text)
+            const response = await axios.post('/messages/new', {'text': `${text}`});
             console.log(response);
+            return response.data;
         }catch(error){
-            $alertSpace.text('Request failed. Please try again.')
+            $error = $('<div class="alert alert-danger">Message add failed</div>')
+            $modalBody.prepend($error)
         }
     }
 }
@@ -31,16 +32,12 @@ class Like {
             console.log('response.data = ', response.data);
             return response.data;
         } catch(error) {
-            $alertSpace.text("Request failed. Please try again")
+            $error = $('<div class="alert alert-danger">Like failed</div>')
+            $container.prepend($error)
         }
     }
 }
 
 
-// create modal in which to create a new message (put the form in it)
-// create event listener on the modal to submit addMessage
-// make sure it works
-// fix likes functionality now that I added the bootstrap javascript which apparently broke it
-// fix likes page doing the likes button incorrectly
 // write tests for all javascript functions
 

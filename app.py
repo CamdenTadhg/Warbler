@@ -3,13 +3,15 @@ import os
 from flask import Flask, render_template, request, flash, redirect, session, g, jsonify
 from sqlalchemy.exc import IntegrityError
 
-from forms import UserAddForm, LoginForm, MessageForm, UserEditForm
+from forms import UserAddForm, LoginForm, UserEditForm
 from models import db, connect_db, User, Message, Follows
 import pdb
 
 CURR_USER_KEY = "curr_user"
 
 app = Flask(__name__)
+if __name__ == "__main__":
+    app.run(debug=True)
 
 # Get DB_URI from environ variable (useful for production/testing) or,
 # if not set there, use development local db.
@@ -304,17 +306,11 @@ def add_remove_likes(msg_id):
             user.likes.append(message)
             db.session.add(user)
             db.session.commit()
-            print('***********************')
-            print(user.likes)
-            print('************************')
             return jsonify('like added')
         elif message in user.likes:
             user.likes.remove(message)
             db.session.add(user)
             db.session.commit()
-            print('***********************')
-            print(user.likes)
-            print('************************')
             return jsonify('like removed')
     else:
         return jsonify('request failed')
@@ -433,8 +429,7 @@ def add_header(req):
     return req
 
 
-# 16 implement AJAX
-# 15 fix display of individual messages to show liked status correctly
+# 15 implement AJAX
 # 14 fix delete messages
 # 13 DRY up templates
     # testing

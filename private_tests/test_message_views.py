@@ -69,10 +69,11 @@ class MessageViewTestCase(TestCase):
             # Now, that session setting is saved, so we can have
             # the rest of ours test
 
-            resp = c.post("/messages/new", data={"text": "Hello"})
+            resp = c.post("/messages/new", json={"text": "Hello"})
 
             # Make sure it redirects
-            self.assertEqual(resp.status_code, 302)
+            self.assertEqual(resp.status_code, 200)
+            self.assertEqual(resp.json, 'message created')
 
             msg = Message.query.one()
             self.assertEqual(msg.text, "Hello")
