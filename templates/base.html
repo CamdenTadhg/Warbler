@@ -60,7 +60,11 @@
       <button type="button" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#newMessageModal" id="new-message-link">
         New message
       </button>
-      <li><a href="/logout">Log out</a></li>
+      <li>
+        <form method="POST" action="/logout">
+          <button class="btn btn-link" id="logout-link">Log out</button>
+        </form>
+      </li>
       {% endif %}
     </ul>
   </div>
