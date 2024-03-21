@@ -112,25 +112,25 @@ class UserViewTestCase(TestCase):
 
                 self.assertEqual(session[CURR_USER_KEY], self.testuser.id)
 
-    # def test_do_logout(self):
-    #     """Does do_logout fuction work?"""
-    #     with app.test_request_context():
-    #         with self.client as c:
-    #             with c.session_transaction() as session:
-    #                 session[CURR_USER_KEY] = self.testuser.id
-    #             do_logout()
+    def test_do_logout(self):
+        """Does do_logout fuction work?"""
+        with app.test_request_context():
+            with self.client as c:
+                with c.session_transaction() as session:
+                    session[CURR_USER_KEY] = self.testuser.id
+                do_logout()
 
-    #             self.assertFalse(session.get(CURR_USER_KEY))
+                self.assertFalse(session.get(CURR_USER_KEY))
 
-    # def test_add_user_to_g(self):
-    #     """Does add_user_to_g function work?"""
-    #     with app.test_request_context():
-    #         with self.client as c:
-    #             with c.session_transaction() as session:
-    #                 session[CURR_USER_KEY] = self.testuser.id
-    #             add_user_to_g()
+    def test_add_user_to_g(self):
+        """Does add_user_to_g function work?"""
+        with app.test_request_context():
+            with self.client as c:
+                with c.session_transaction() as session:
+                    session[CURR_USER_KEY] = self.testuser.id
+                add_user_to_g()
 
-    #             self.assertEqual(g.user, self.testuser)
+                self.assertEqual(g.user, self.testuser)
 
     def test_signup_get(self):
         """If there is no valid form submission, does the site display the signup form?"""
@@ -326,29 +326,29 @@ class UserViewTestCase(TestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertIn('Welcome back.', html)
 
-    # def test_logout_success(self):
-    #     """Can a user log out?"""
-    #     with self.client as c:
-    #         with c.session_transaction() as session:
-    #             session[CURR_USER_KEY] = self.testuser.id
-    #         resp = c.post('/logout')
+    def test_logout_success(self):
+        """Can a user log out?"""
+        with self.client as c:
+            with c.session_transaction() as session:
+                session[CURR_USER_KEY] = self.testuser.id
+            resp = c.post('/logout')
 
-    #         self.assertEqual(resp.status_code, 302)
-    #         self.assertEqual(resp.location, 'http://localhost/login')
-    #         self.assertFalse(session.get(CURR_USER_KEY))
+            self.assertEqual(resp.status_code, 302)
+            self.assertEqual(resp.location, 'http://localhost/login')
+            self.assertFalse(session.get(CURR_USER_KEY))
 
-    # def test_logout_success_redirect(self):
-    #     """Does the site redirect correctly when a user logs out?"""
-    #     with self.client as c:
-    #         with c.session_transaction() as session:
-    #             session[CURR_USER_KEY] = self.testuser.id
-    #         resp = c.post('/logout', follow_redirects=True)
-    #         html = resp.get_data(as_text=True)
+    def test_logout_success_redirect(self):
+        """Does the site redirect correctly when a user logs out?"""
+        with self.client as c:
+            with c.session_transaction() as session:
+                session[CURR_USER_KEY] = self.testuser.id
+            resp = c.post('/logout', follow_redirects=True)
+            html = resp.get_data(as_text=True)
 
-    #         self.assertEqual(resp.status_code, 200)
-    #         self.assertIn('Welcome back.', html)
-            # self.assertIn('You have logged', html)
-    #         self.assertFalse(session.get(CURR_USER_KEY))
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Welcome back.', html)
+            self.assertIn('You have logged', html)
+            self.assertFalse(session.get(CURR_USER_KEY))
     
     def test_list_users_loggedout(self):
         """Does the site deny access to the user list to an anonymous user?"""
@@ -822,25 +822,26 @@ class UserViewTestCase(TestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertIn('Access unauthorized', html)
             
-    # def test_delete_user(self):
-    #     """Can a user delete their account?"""
-    #     with self.client as c:
-    #         with c.session_transaction() as session:
-    #             session[CURR_USER_KEY] = self.testuser.id
-    #         resp = c.post('/users/delete')
+    def test_delete_user(self):
+        """Can a user delete their account?"""
+        with self.client as c:
+            with c.session_transaction() as session:
+                session[CURR_USER_KEY] = self.testuser.id
+            resp = c.post('/users/delete')
 
-    #         self.assertEqual(resp.status_code, 302)
-    #         self.assertEqual(resp.location, 'http://localhost/signup')
-    #         self.assertFalse(session.get(CURR_USER_KEY))
+            self.assertEqual(resp.status_code, 302)
+            self.assertEqual(resp.location, 'http://localhost/signup')
+            self.assertFalse(session.get(CURR_USER_KEY))
 
-    # def test_delete_user_redirect(self):
-    #     """Does the site redirect correctly when a user deletes their account"""
-    #     with self.client as c:
-    #         with c.session_transaction() as session:
-    #             session[CURR_USER_KEY] = self.testuser.id
-    #         resp = c.post('/users/delete', follow_redirects=True)
-    #         html = resp.get_data(as_text=True)
+    def test_delete_user_redirect(self):
+        """Does the site redirect correctly when a user deletes their account"""
+        with self.client as c:
+            with c.session_transaction() as session:
+                session[CURR_USER_KEY] = self.testuser.id
+            resp = c.post('/users/delete', follow_redirects=True)
+            html = resp.get_data(as_text=True)
 
-    #         self.assertEqual(resp.status_code, 200)
-    #         self.assertIn('Join Warbler today', html)
-    #         self.assertEqual(g.user, None)
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Join Warbler today', html)
+            self.assertEqual(g.user, None)
+            self.assertFalse(session.get(CURR_USER_KEY))

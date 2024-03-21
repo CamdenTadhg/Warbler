@@ -176,19 +176,19 @@ class MessageViewTestCase(TestCase):
             self.assertFalse(db.session.query(Message).filter(Message.text == "testing 1").first())
 
 
-    # def test_delete_message_redirect(self):
-    #     """Does the site redirect correctly when a message is deleted?"""
-    #     with self.client as c:
-    #         with c.session_transaction() as sess:
-    #             sess[CURR_USER_KEY] = self.testuser.id
+    def test_delete_message_redirect(self):
+        """Does the site redirect correctly when a message is deleted?"""
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
 
-    #         msg = db.session.query(Message).filter(Message.text == "testing 1").first()
-    #         resp = c.post(f'/messages/{msg.id}/delete', follow_redirects=True)
-    #         html = resp.get_data(as_text=True)
+            msg = db.session.query(Message).filter(Message.text == "testing 1").first()
+            resp = c.post(f'/messages/{msg.id}/delete', follow_redirects=True)
+            html = resp.get_data(as_text=True)
 
-    #         self.assertEqual(resp.status_code, 200)
-    #         self.assertIn('@testuser', html)
-    #         self.assertNotIn('testing 1', html)
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('@testuser', html)
+            self.assertNotIn('testing 1', html)
 
     def test_delete_message_wrong_user(self):
         """Does the site respond correctly when a user tries to delete another user's message?"""

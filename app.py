@@ -15,9 +15,9 @@ if __name__ == "__main__":
 
 # Get DB_URI from environ variable (useful for production/testing) or,
 # if not set there, use development local db.
-app.config['SQLALCHEMY_DATABASE_URI'] = (
-    os.environ.get('DATABASE_URL', 'postgresql:///warbler'))
-# app.config['SQLALCHEMY_DATABASE_URI'] = (os.environ.get('DATABASE_URL', "postgresql:///warbler-test"))
+# app.config['SQLALCHEMY_DATABASE_URI'] = (
+    # os.environ.get('DATABASE_URL', 'postgresql:///warbler'))
+app.config['SQLALCHEMY_DATABASE_URI'] = (os.environ.get('DATABASE_URL', "postgresql:///warbler-test"))
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = False
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
@@ -429,27 +429,27 @@ def add_header(req):
     return req
 
 
-# 15 implement AJAX
-# 14 fix delete messages
-# 13 DRY up templates
+# 14 finish implementing tests
+# 13 implement AJAX
     # testing
-# 12 DRY up authorization 
+# 12 DRY up templates
     # testing
-# 11 DRY up URLs
+# 11 DRY up authorization 
     # testing
-# 10 optimize queries
+# 10 DRY up URLs
     # testing
-# 9 implement change password
+# 9 optimize queries
     # testing
-# 8 implement private accounts
+# 8 implement change password
     # testing
-# 7 implement admin users
+# 7 implement private accounts
     # testing
-# 6 implement user blocking
+# 6 implement admin users
     # testing
-# 5 implement direct messages
+# 5 implement user blocking
     # testing
-# 4 finish implementing tests
+# 4 implement direct messages
+    # testing
 # 3 go through the whole thing, clean up prints & console.logs, add comments, etc.
     # testing
 # 2 run private tests one more time.

@@ -101,7 +101,7 @@ class User(db.Model):
         secondary="follows",
         primaryjoin=(Follows.user_being_followed_id == id),
         secondaryjoin=(Follows.user_following_id == id), 
-        cascade="all, delete"
+        # cascade="all, delete"
     )
 
     following = db.relationship(
@@ -109,13 +109,13 @@ class User(db.Model):
         secondary="follows",
         primaryjoin=(Follows.user_following_id == id),
         secondaryjoin=(Follows.user_being_followed_id == id),
-        cascade="all,delete"
+        # cascade="all,delete"
     )
 
     likes = db.relationship(
         'Message',
         secondary="likes",
-        cascade="all,delete"
+        # cascade="all,delete"
     )
 
     def __repr__(self):
@@ -204,7 +204,7 @@ class Message(db.Model):
         nullable=False,
     )
 
-    user = db.relationship('User', cascade="all, delete")
+    user = db.relationship('User')
 
 
 def connect_db(app):
