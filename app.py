@@ -429,6 +429,7 @@ def add_header(req):
     return req
 
 
+# 15 fix likes on render site
 # 14 finish implementing tests
 # 13 implement AJAX
     # testing
